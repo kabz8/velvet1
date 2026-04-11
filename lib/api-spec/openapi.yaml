@@ -3,20 +3,42 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Velvet Store API - Premium adult wellness ecommerce for Kenya
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: products
+    description: Product catalog
+  - name: categories
+    description: Product categories
+  - name: cart
+    description: Shopping cart
+  - name: orders
+    description: Order management
+  - name: banners
+    description: Hero banners and slides
+  - name: coupons
+    description: Coupon codes
+  - name: settings
+    description: Site settings
+  - name: admin
+    description: Admin operations
+  - name: testimonials
+    description: Customer testimonials
+  - name: faqs
+    description: FAQs
+  - name: offers
+    description: Offers and discounts
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +46,1058 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── PRODUCTS ───────────────────────────────────────────────────
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List products
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: tags
+          in: query
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+        - name: inStock
+          in: query
+          schema:
+            type: boolean
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+        - name: isOffer
+          in: query
+          schema:
+            type: boolean
+        - name: isBestSeller
+          in: query
+          schema:
+            type: boolean
+        - name: isNewArrival
+          in: query
+          schema:
+            type: boolean
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [price_asc, price_desc, newest, popular]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [published, draft]
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductListResponse"
+
+    post:
+      operationId: createProduct
+      tags: [products, admin]
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductBody"
+      responses:
+        "201":
+          description: Created product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/featured:
+    get:
+      operationId: getFeaturedProducts
+      tags: [products]
+      summary: Get featured and best-seller products for homepage
+      responses:
+        "200":
+          description: Featured products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeaturedProductsResponse"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+
+    put:
+      operationId: updateProduct
+      tags: [products, admin]
+      summary: Update a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductBody"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+    delete:
+      operationId: deleteProduct
+      tags: [products, admin]
+      summary: Delete a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /products/{id}/images:
+    post:
+      operationId: uploadProductImage
+      tags: [products, admin]
+      summary: Upload a product image (base64)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadImageBody"
+      responses:
+        "201":
+          description: Uploaded image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductImage"
+
+    delete:
+      operationId: deleteProductImage
+      tags: [products, admin]
+      summary: Delete a product image
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: imageId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /products/{id}/related:
+    get:
+      operationId: getRelatedProducts
+      tags: [products]
+      summary: Get related products
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Related products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  # ── CATEGORIES ─────────────────────────────────────────────────
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List all categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+    post:
+      operationId: createCategory
+      tags: [categories, admin]
+      summary: Create a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryBody"
+      responses:
+        "201":
+          description: Created category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /categories/{id}:
+    put:
+      operationId: updateCategory
+      tags: [categories, admin]
+      summary: Update a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryBody"
+      responses:
+        "200":
+          description: Updated category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+    delete:
+      operationId: deleteCategory
+      tags: [categories, admin]
+      summary: Delete a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── BANNERS ────────────────────────────────────────────────────
+  /banners:
+    get:
+      operationId: listBanners
+      tags: [banners]
+      summary: List active banners
+      parameters:
+        - name: all
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of banners
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Banner"
+
+    post:
+      operationId: createBanner
+      tags: [banners, admin]
+      summary: Create a banner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBannerBody"
+      responses:
+        "201":
+          description: Created banner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Banner"
+
+  /banners/{id}:
+    put:
+      operationId: updateBanner
+      tags: [banners, admin]
+      summary: Update a banner
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBannerBody"
+      responses:
+        "200":
+          description: Updated banner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Banner"
+
+    delete:
+      operationId: deleteBanner
+      tags: [banners, admin]
+      summary: Delete a banner
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── OFFERS ─────────────────────────────────────────────────────
+  /offers:
+    get:
+      operationId: listOffers
+      tags: [offers]
+      summary: List offers
+      parameters:
+        - name: active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of offers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Offer"
+
+    post:
+      operationId: createOffer
+      tags: [offers, admin]
+      summary: Create an offer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOfferBody"
+      responses:
+        "201":
+          description: Created offer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offer"
+
+  /offers/{id}:
+    put:
+      operationId: updateOffer
+      tags: [offers, admin]
+      summary: Update an offer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOfferBody"
+      responses:
+        "200":
+          description: Updated offer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offer"
+
+    delete:
+      operationId: deleteOffer
+      tags: [offers, admin]
+      summary: Delete an offer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── COUPONS ────────────────────────────────────────────────────
+  /coupons:
+    get:
+      operationId: listCoupons
+      tags: [coupons, admin]
+      summary: List all coupons
+      responses:
+        "200":
+          description: List of coupons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Coupon"
+
+    post:
+      operationId: createCoupon
+      tags: [coupons, admin]
+      summary: Create a coupon
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCouponBody"
+      responses:
+        "201":
+          description: Created coupon
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Coupon"
+
+  /coupons/{id}:
+    put:
+      operationId: updateCoupon
+      tags: [coupons, admin]
+      summary: Update a coupon
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCouponBody"
+      responses:
+        "200":
+          description: Updated coupon
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Coupon"
+
+    delete:
+      operationId: deleteCoupon
+      tags: [coupons, admin]
+      summary: Delete a coupon
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /coupons/validate:
+    post:
+      operationId: validateCoupon
+      tags: [coupons]
+      summary: Validate a coupon code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidateCouponBody"
+      responses:
+        "200":
+          description: Coupon validation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CouponValidationResult"
+
+  # ── ORDERS ─────────────────────────────────────────────────────
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders, admin]
+      summary: List orders
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, confirmed, processing, out_for_delivery, delivered, cancelled]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderListResponse"
+
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create an order (checkout)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderBody"
+      responses:
+        "201":
+          description: Created order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get an order by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+    put:
+      operationId: updateOrder
+      tags: [orders, admin]
+      summary: Update order status / notes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrderBody"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  # ── ADMIN DASHBOARD ────────────────────────────────────────────
+  /admin/dashboard:
+    get:
+      operationId: getDashboardStats
+      tags: [admin]
+      summary: Get dashboard overview stats
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /admin/customers:
+    get:
+      operationId: listCustomers
+      tags: [admin]
+      summary: List customers
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of customers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerListResponse"
+
+  /admin/audit-logs:
+    get:
+      operationId: listAuditLogs
+      tags: [admin]
+      summary: List audit log entries
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogListResponse"
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLoginResponse"
+
+  /admin/logout:
+    post:
+      operationId: adminLogout
+      tags: [admin]
+      summary: Admin logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/me:
+    get:
+      operationId: getAdminMe
+      tags: [admin]
+      summary: Get current admin user
+      responses:
+        "200":
+          description: Current admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+        "401":
+          description: Unauthorized
+
+  # ── SETTINGS ───────────────────────────────────────────────────
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get all site settings
+      responses:
+        "200":
+          description: Settings object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+
+    put:
+      operationId: updateSettings
+      tags: [settings, admin]
+      summary: Update site settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSettingsBody"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+
+  /settings/age-gate:
+    get:
+      operationId: getAgeGateSettings
+      tags: [settings]
+      summary: Get age gate settings
+      responses:
+        "200":
+          description: Age gate settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgeGateSettings"
+
+    put:
+      operationId: updateAgeGateSettings
+      tags: [settings, admin]
+      summary: Update age gate settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgeGateSettings"
+      responses:
+        "200":
+          description: Updated age gate settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgeGateSettings"
+
+  /settings/shipping:
+    get:
+      operationId: getShippingSettings
+      tags: [settings]
+      summary: Get shipping fee settings
+      responses:
+        "200":
+          description: Shipping settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShippingSettings"
+
+    put:
+      operationId: updateShippingSettings
+      tags: [settings, admin]
+      summary: Update shipping fee settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShippingSettings"
+      responses:
+        "200":
+          description: Updated shipping settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShippingSettings"
+
+  # ── TESTIMONIALS ───────────────────────────────────────────────
+  /testimonials:
+    get:
+      operationId: listTestimonials
+      tags: [testimonials]
+      summary: List testimonials
+      responses:
+        "200":
+          description: List of testimonials
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Testimonial"
+
+    post:
+      operationId: createTestimonial
+      tags: [testimonials, admin]
+      summary: Create a testimonial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTestimonialBody"
+      responses:
+        "201":
+          description: Created testimonial
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Testimonial"
+
+  /testimonials/{id}:
+    put:
+      operationId: updateTestimonial
+      tags: [testimonials, admin]
+      summary: Update a testimonial
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTestimonialBody"
+      responses:
+        "200":
+          description: Updated testimonial
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Testimonial"
+
+    delete:
+      operationId: deleteTestimonial
+      tags: [testimonials, admin]
+      summary: Delete a testimonial
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── FAQS ───────────────────────────────────────────────────────
+  /faqs:
+    get:
+      operationId: listFaqs
+      tags: [faqs]
+      summary: List FAQs
+      responses:
+        "200":
+          description: List of FAQs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Faq"
+
+    post:
+      operationId: createFaq
+      tags: [faqs, admin]
+      summary: Create a FAQ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFaqBody"
+      responses:
+        "201":
+          description: Created FAQ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Faq"
+
+  /faqs/{id}:
+    put:
+      operationId: updateFaq
+      tags: [faqs, admin]
+      summary: Update a FAQ
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFaqBody"
+      responses:
+        "200":
+          description: Updated FAQ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Faq"
+
+    delete:
+      operationId: deleteFaq
+      tags: [faqs, admin]
+      summary: Delete a FAQ
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── MEDIA UPLOAD ───────────────────────────────────────────────
+  /upload:
+    post:
+      operationId: uploadFile
+      tags: [admin]
+      summary: Upload a file (base64) and get back a URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadFileBody"
+      responses:
+        "201":
+          description: Uploaded file URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadFileResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +1105,982 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success]
+
+    # ── PRODUCT SCHEMAS ─────────────────────────────────────────
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        sku:
+          type: string
+        shortDescription:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        compareAtPrice:
+          type: number
+          nullable: true
+        stockQuantity:
+          type: integer
+        categoryId:
+          type: integer
+          nullable: true
+        category:
+          $ref: "#/components/schemas/Category"
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductImage"
+        featured:
+          type: boolean
+        isOffer:
+          type: boolean
+        isBestSeller:
+          type: boolean
+        isNewArrival:
+          type: boolean
+        status:
+          type: string
+          enum: [published, draft]
+        seoTitle:
+          type: string
+          nullable: true
+        seoDescription:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, title, slug, price, stockQuantity, featured, isOffer, isBestSeller, isNewArrival, status, createdAt, updatedAt, images, tags]
+
+    ProductImage:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        url:
+          type: string
+        altText:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+        isPrimary:
+          type: boolean
+      required: [id, productId, url, sortOrder, isPrimary]
+
+    ProductListResponse:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        total:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+      required: [products, total, page, totalPages]
+
+    FeaturedProductsResponse:
+      type: object
+      properties:
+        featured:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        bestSellers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        newArrivals:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        offers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+      required: [featured, bestSellers, newArrivals, offers]
+
+    CreateProductBody:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        sku:
+          type: string
+        shortDescription:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        compareAtPrice:
+          type: number
+          nullable: true
+        stockQuantity:
+          type: integer
+        categoryId:
+          type: integer
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        featured:
+          type: boolean
+        isOffer:
+          type: boolean
+        isBestSeller:
+          type: boolean
+        isNewArrival:
+          type: boolean
+        status:
+          type: string
+          enum: [published, draft]
+        seoTitle:
+          type: string
+          nullable: true
+        seoDescription:
+          type: string
+          nullable: true
+      required: [title, slug, price, stockQuantity, status]
+
+    UpdateProductBody:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        sku:
+          type: string
+        shortDescription:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        compareAtPrice:
+          type: number
+          nullable: true
+        stockQuantity:
+          type: integer
+        categoryId:
+          type: integer
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        featured:
+          type: boolean
+        isOffer:
+          type: boolean
+        isBestSeller:
+          type: boolean
+        isNewArrival:
+          type: boolean
+        status:
+          type: string
+          enum: [published, draft]
+        seoTitle:
+          type: string
+          nullable: true
+        seoDescription:
+          type: string
+          nullable: true
+
+    UploadImageBody:
+      type: object
+      properties:
+        data:
+          type: string
+          description: base64 encoded image data
+        mimeType:
+          type: string
+        altText:
+          type: string
+          nullable: true
+        isPrimary:
+          type: boolean
+      required: [data, mimeType]
+
+    # ── CATEGORY SCHEMAS ────────────────────────────────────────
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+        productCount:
+          type: integer
+        createdAt:
+          type: string
+      required: [id, name, slug, productCount, createdAt]
+
+    CreateCategoryBody:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+      required: [name, slug]
+
+    # ── BANNER SCHEMAS ──────────────────────────────────────────
+    Banner:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        subtitle:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+        ctaLabel:
+          type: string
+          nullable: true
+        ctaLink:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+      required: [id, title, sortOrder, isActive, createdAt]
+
+    CreateBannerBody:
+      type: object
+      properties:
+        title:
+          type: string
+        subtitle:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+        ctaLabel:
+          type: string
+          nullable: true
+        ctaLink:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+        isActive:
+          type: boolean
+      required: [title, sortOrder, isActive]
+
+    # ── OFFER SCHEMAS ───────────────────────────────────────────
+    Offer:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        discountType:
+          type: string
+          enum: [fixed, percentage]
+        discountValue:
+          type: number
+        startDate:
+          type: string
+          nullable: true
+        endDate:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+        productIds:
+          type: array
+          items:
+            type: integer
+        categoryIds:
+          type: array
+          items:
+            type: integer
+        createdAt:
+          type: string
+      required: [id, name, discountType, discountValue, isActive, productIds, categoryIds, createdAt]
+
+    CreateOfferBody:
+      type: object
+      properties:
+        name:
+          type: string
+        discountType:
+          type: string
+          enum: [fixed, percentage]
+        discountValue:
+          type: number
+        startDate:
+          type: string
+          nullable: true
+        endDate:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+        productIds:
+          type: array
+          items:
+            type: integer
+        categoryIds:
+          type: array
+          items:
+            type: integer
+      required: [name, discountType, discountValue, isActive]
+
+    # ── COUPON SCHEMAS ──────────────────────────────────────────
+    Coupon:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        discountType:
+          type: string
+          enum: [fixed, percentage]
+        discountValue:
+          type: number
+        minOrderAmount:
+          type: number
+          nullable: true
+        maxUses:
+          type: integer
+          nullable: true
+        usedCount:
+          type: integer
+        isActive:
+          type: boolean
+        expiresAt:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, code, discountType, discountValue, usedCount, isActive, createdAt]
+
+    CreateCouponBody:
+      type: object
+      properties:
+        code:
+          type: string
+        discountType:
+          type: string
+          enum: [fixed, percentage]
+        discountValue:
+          type: number
+        minOrderAmount:
+          type: number
+          nullable: true
+        maxUses:
+          type: integer
+          nullable: true
+        isActive:
+          type: boolean
+        expiresAt:
+          type: string
+          nullable: true
+      required: [code, discountType, discountValue, isActive]
+
+    ValidateCouponBody:
+      type: object
+      properties:
+        code:
+          type: string
+        orderAmount:
+          type: number
+      required: [code, orderAmount]
+
+    CouponValidationResult:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        coupon:
+          $ref: "#/components/schemas/Coupon"
+          nullable: true
+        discountAmount:
+          type: number
+        message:
+          type: string
+          nullable: true
+      required: [valid, discountAmount]
+
+    # ── ORDER SCHEMAS ───────────────────────────────────────────
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        orderNumber:
+          type: string
+        status:
+          type: string
+          enum: [pending, confirmed, processing, out_for_delivery, delivered, cancelled]
+        customerName:
+          type: string
+          nullable: true
+        customerPhone:
+          type: string
+        customerEmail:
+          type: string
+          nullable: true
+        isAnonymous:
+          type: boolean
+        deliveryAddress:
+          type: string
+        deliveryRegion:
+          type: string
+          enum: [nairobi, outside_nairobi]
+        shippingFee:
+          type: number
+        subtotal:
+          type: number
+        discountAmount:
+          type: number
+        total:
+          type: number
+        couponCode:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        internalNotes:
+          type: string
+          nullable: true
+        paymentMethod:
+          type: string
+          enum: [cash_on_delivery, manual_payment, pending]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, orderNumber, status, customerPhone, isAnonymous, deliveryAddress, deliveryRegion, shippingFee, subtotal, discountAmount, total, paymentMethod, items, createdAt, updatedAt]
+
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        orderId:
+          type: integer
+        productId:
+          type: integer
+        productTitle:
+          type: string
+        productImageUrl:
+          type: string
+          nullable: true
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+        totalPrice:
+          type: number
+      required: [id, orderId, productId, productTitle, quantity, unitPrice, totalPrice]
+
+    OrderListResponse:
+      type: object
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        total:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+      required: [orders, total, page, totalPages]
+
+    CreateOrderBody:
+      type: object
+      properties:
+        customerName:
+          type: string
+          nullable: true
+        customerPhone:
+          type: string
+        customerEmail:
+          type: string
+          nullable: true
+        isAnonymous:
+          type: boolean
+        deliveryAddress:
+          type: string
+        deliveryRegion:
+          type: string
+          enum: [nairobi, outside_nairobi]
+        notes:
+          type: string
+          nullable: true
+        couponCode:
+          type: string
+          nullable: true
+        paymentMethod:
+          type: string
+          enum: [cash_on_delivery, manual_payment, pending]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItemInput"
+      required: [customerPhone, deliveryAddress, deliveryRegion, paymentMethod, items]
+
+    OrderItemInput:
+      type: object
+      properties:
+        productId:
+          type: integer
+        quantity:
+          type: integer
+      required: [productId, quantity]
+
+    UpdateOrderBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, confirmed, processing, out_for_delivery, delivered, cancelled]
+        internalNotes:
+          type: string
+          nullable: true
+
+    # ── ADMIN SCHEMAS ───────────────────────────────────────────
+    AdminUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [admin, manager, staff]
+      required: [id, email, name, role]
+
+    AdminLoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required: [email, password]
+
+    AdminLoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/AdminUser"
+        token:
+          type: string
+      required: [user, token]
+
+    DashboardStats:
+      type: object
+      properties:
+        totalRevenue:
+          type: number
+        totalOrders:
+          type: integer
+        totalProducts:
+          type: integer
+        totalCustomers:
+          type: integer
+        pendingOrders:
+          type: integer
+        lowStockProducts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        recentOrders:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        topProducts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        revenueByMonth:
+          type: array
+          items:
+            $ref: "#/components/schemas/MonthlyRevenue"
+        ordersByStatus:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+      required: [totalRevenue, totalOrders, totalProducts, totalCustomers, pendingOrders, lowStockProducts, recentOrders, topProducts, revenueByMonth, ordersByStatus]
+
+    MonthlyRevenue:
+      type: object
+      properties:
+        month:
+          type: string
+        revenue:
+          type: number
+        orders:
+          type: integer
+      required: [month, revenue, orders]
+
+    StatusCount:
+      type: object
+      properties:
+        status:
+          type: string
+        count:
+          type: integer
+      required: [status, count]
+
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+        phone:
+          type: string
+        name:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        isAnonymous:
+          type: boolean
+        totalOrders:
+          type: integer
+        totalSpent:
+          type: number
+        createdAt:
+          type: string
+      required: [id, phone, isAnonymous, totalOrders, totalSpent, createdAt]
+
+    CustomerListResponse:
+      type: object
+      properties:
+        customers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Customer"
+        total:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+      required: [customers, total, page, totalPages]
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        adminId:
+          type: integer
+          nullable: true
+        adminName:
+          type: string
+          nullable: true
+        action:
+          type: string
+        entityType:
+          type: string
+        entityId:
+          type: string
+          nullable: true
+        previousValue:
+          type: string
+          nullable: true
+        newValue:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, action, entityType, createdAt]
+
+    AuditLogListResponse:
+      type: object
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+        total:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+      required: [logs, total, page, totalPages]
+
+    # ── SETTINGS SCHEMAS ────────────────────────────────────────
+    SiteSettings:
+      type: object
+      properties:
+        storeName:
+          type: string
+        storeEmail:
+          type: string
+          nullable: true
+        storePhone:
+          type: string
+          nullable: true
+        storeAddress:
+          type: string
+          nullable: true
+        announcementBar:
+          type: string
+          nullable: true
+        announcementBarEnabled:
+          type: boolean
+        socialFacebook:
+          type: string
+          nullable: true
+        socialInstagram:
+          type: string
+          nullable: true
+        socialTwitter:
+          type: string
+          nullable: true
+        socialWhatsapp:
+          type: string
+          nullable: true
+        footerText:
+          type: string
+          nullable: true
+        cashOnDeliveryEnabled:
+          type: boolean
+        metaTitle:
+          type: string
+          nullable: true
+        metaDescription:
+          type: string
+          nullable: true
+        socialImageUrl:
+          type: string
+          nullable: true
+      required: [storeName, announcementBarEnabled, cashOnDeliveryEnabled]
+
+    UpdateSettingsBody:
+      type: object
+      properties:
+        storeName:
+          type: string
+        storeEmail:
+          type: string
+          nullable: true
+        storePhone:
+          type: string
+          nullable: true
+        storeAddress:
+          type: string
+          nullable: true
+        announcementBar:
+          type: string
+          nullable: true
+        announcementBarEnabled:
+          type: boolean
+        socialFacebook:
+          type: string
+          nullable: true
+        socialInstagram:
+          type: string
+          nullable: true
+        socialTwitter:
+          type: string
+          nullable: true
+        socialWhatsapp:
+          type: string
+          nullable: true
+        footerText:
+          type: string
+          nullable: true
+        cashOnDeliveryEnabled:
+          type: boolean
+        metaTitle:
+          type: string
+          nullable: true
+        metaDescription:
+          type: string
+          nullable: true
+        socialImageUrl:
+          type: string
+          nullable: true
+
+    AgeGateSettings:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        title:
+          type: string
+        message:
+          type: string
+        confirmLabel:
+          type: string
+        exitLabel:
+          type: string
+        backgroundImageUrl:
+          type: string
+          nullable: true
+      required: [enabled, title, message, confirmLabel, exitLabel]
+
+    ShippingSettings:
+      type: object
+      properties:
+        nairobiCountyFee:
+          type: number
+        outsideNairobiFee:
+          type: number
+      required: [nairobiCountyFee, outsideNairobiFee]
+
+    # ── TESTIMONIAL SCHEMAS ─────────────────────────────────────
+    Testimonial:
+      type: object
+      properties:
+        id:
+          type: integer
+        customerAlias:
+          type: string
+        rating:
+          type: integer
+        content:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+      required: [id, customerAlias, rating, content, isActive, createdAt]
+
+    CreateTestimonialBody:
+      type: object
+      properties:
+        customerAlias:
+          type: string
+        rating:
+          type: integer
+        content:
+          type: string
+        isActive:
+          type: boolean
+      required: [customerAlias, rating, content, isActive]
+
+    # ── FAQ SCHEMAS ─────────────────────────────────────────────
+    Faq:
+      type: object
+      properties:
+        id:
+          type: integer
+        question:
+          type: string
+        answer:
+          type: string
+        sortOrder:
+          type: integer
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+      required: [id, question, answer, sortOrder, isActive, createdAt]
+
+    CreateFaqBody:
+      type: object
+      properties:
+        question:
+          type: string
+        answer:
+          type: string
+        sortOrder:
+          type: integer
+        isActive:
+          type: boolean
+      required: [question, answer, sortOrder, isActive]
+
+    # ── UPLOAD SCHEMAS ──────────────────────────────────────────
+    UploadFileBody:
+      type: object
+      properties:
+        data:
+          type: string
+          description: base64 encoded file data
+        mimeType:
+          type: string
+        folder:
+          type: string
+          nullable: true
+        filename:
+          type: string
+          nullable: true
+      required: [data, mimeType]
+
+    UploadFileResponse:
+      type: object
+      properties:
+        url:
+          type: string
+        filename:
+          type: string
+      required: [url, filename]

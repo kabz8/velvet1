@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Velvet Store"
+version = "1.0.0"
+id = "artifacts/velvet-store"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23136
+
+[services.development]
+run = "pnpm --filter @workspace/velvet-store run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/velvet-store", "run", "build" ]
+publicDir = "artifacts/velvet-store/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23136"
+BASE_PATH = "/"

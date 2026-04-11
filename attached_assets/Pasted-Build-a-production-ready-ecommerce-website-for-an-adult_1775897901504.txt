@@ -1,0 +1,308 @@
+Build a production-ready ecommerce website for an adult wellness / intimate products store in Kenya. The store must feel premium, discreet, tasteful, moodful, modern, and conversion-focused — never vulgar or overly explicit. The overall visual style should be elegant, soft, dark-luxury, and trustworthy, with a private-shopping feel.
+
+Core stack:
+- Next.js 15 + TypeScript + App Router
+- Tailwind CSS
+- shadcn/ui
+- Supabase for:
+  - PostgreSQL database
+  - Authentication
+  - Storage for media uploads
+- Prisma ORM or Supabase-native queries
+- Ready for deployment on Vercel
+- Optimized for Replit development
+- Fully responsive
+- SEO optimized
+
+Important business rules:
+- Currency: KES only
+- Nairobi County delivery fee: KES 300
+- Outside Nairobi delivery fee: KES 450
+- Guest checkout allowed
+- Anonymous checkout optional
+- Phone number is always required for delivery arrangements
+- All product images, banner images, and files must be uploaded directly from the dashboard using file upload inputs
+- Do NOT require manual backend file URLs for images/files
+- Site must feel discreet, luxurious, trustworthy, and private
+
+Brand direction:
+- Premium, elegant, private, romantic, tasteful
+- Dark theme by default
+- Soft gradients, smooth shadows, premium spacing, subtle animations
+- Clean luxury ecommerce aesthetic
+- Classy and discreet language throughout
+- Optional light mode supported
+
+Add an 18+ entry gate:
+- On first visit, show a beautiful full-screen age confirmation modal/page
+- Messaging should be tasteful and discreet, e.g. “This store contains products intended for adults only”
+- User must confirm they are 18+ to enter
+- Include “I am 18+” and “Exit” actions
+- Save confirmation in a cookie or local storage so the gate does not appear on every page load
+- Gate should be manageable from admin settings:
+  - enable/disable
+  - edit title
+  - edit message
+  - edit button labels
+  - background image/banner upload
+- The age gate should match the premium moodful design of the site
+
+Customer-facing pages:
+1. Home
+   - Hero section
+   - CTA buttons
+   - Featured categories
+   - Best sellers
+   - New arrivals
+   - Offers section
+   - Promotional banner slider
+   - Discreet delivery section
+   - Why shop with us
+   - Testimonials
+   - FAQ preview
+   - Newsletter
+2. Shop
+   - Product grid
+   - Search
+   - Filters by category, tags, price, stock
+   - Sorting
+3. Product details
+   - Gallery
+   - Price in KES
+   - Description
+   - Features
+   - Usage notes
+   - Delivery details
+   - Related products
+   - Badges such as New, Best Seller, Offer
+4. Offers page
+5. Categories page
+6. About page
+7. Contact page
+8. FAQ page
+9. Privacy + Discreet Packaging page
+10. Terms and Conditions page
+11. Shipping and Returns page
+12. Anonymous Checkout Information page
+
+Checkout requirements:
+- Guest checkout
+- Optional anonymous checkout
+- Name can be optional or initials-only
+- Phone number required
+- Delivery address required
+- Region selector:
+  - Nairobi County
+  - Outside Nairobi
+- Automatically apply shipping fee based on selected region
+- Show subtotal, shipping, discount, total
+- Order notes field
+- Private/discreet trust messaging during checkout
+- Coupon support
+
+Cart features:
+- Add to cart
+- Update quantity
+- Remove item
+- Cart drawer
+- Cart page
+- Show totals clearly
+
+Payment architecture:
+- Build in a way that payment gateways can be connected later
+- For now include:
+  - manual payment / pending payment option
+  - cash on delivery toggle in admin settings
+- Structure payment methods cleanly for future integration with M-Pesa or card payments
+
+Discreet shopping features:
+- Discreet packaging messaging
+- Privacy-first UX
+- Minimal sensitive wording in customer emails/order records
+- Optional anonymous checkout
+- Trust badges across site
+
+Admin dashboard / CMS:
+Create a secure admin dashboard with authentication, roles, and audit trail.
+
+Modules:
+1. Dashboard Overview
+   - Revenue summary
+   - Orders summary
+   - Top products
+   - Recent orders
+   - Low stock alerts
+2. Products
+   - Create/edit/delete/archive products
+   - Upload multiple product images directly from dashboard to Supabase Storage
+   - Fields:
+     - title
+     - slug
+     - SKU
+     - short description
+     - full description
+     - price
+     - compare-at price
+     - stock quantity
+     - category
+     - tags
+     - featured toggle
+     - offer toggle
+     - best seller toggle
+     - new arrival toggle
+     - publish/draft
+     - SEO title
+     - SEO description
+3. Categories
+   - Create/edit/delete
+   - Category image upload
+4. Offers
+   - Create/manage offers
+   - fixed or percentage discounts
+   - start date / end date
+   - assign to products or categories
+5. Banners / Slides
+   - Upload banner/slide images directly from dashboard
+   - title
+   - subtitle
+   - CTA label
+   - CTA link
+   - sort order
+   - publish toggle
+6. Orders
+   - View all orders
+   - Filter by status
+   - Change order status
+   - Add internal notes
+   - View delivery region
+   - View required phone number
+   - View order breakdown
+7. Customers
+   - Basic customer records
+   - Guest checkout records
+8. Coupons
+   - Create/edit/delete coupon codes
+9. Shipping Settings
+   - Nairobi County fee
+   - Outside Nairobi fee
+10. SEO Settings
+   - Global meta title
+   - Meta description
+   - Social sharing image upload
+   - Sitemap generation
+11. Site Settings
+   - Store name
+   - Contact info
+   - Social links
+   - Announcement bar
+   - Footer content
+12. Age Gate Settings
+   - Enable/disable 18+ gate
+   - Edit text
+   - Upload background/banner
+13. Users and Roles
+   - Admin
+   - Manager
+   - Staff
+14. Audit Trail
+   - Log all important actions:
+     - product created/edited/deleted
+     - order updated
+     - banner changed
+     - offer created/edited
+     - shipping settings changed
+     - age gate settings changed
+     - login/logout events
+   - Each audit record should store:
+     - user
+     - action
+     - timestamp
+     - affected record
+     - previous value/new value where possible
+
+Order statuses:
+- Pending
+- Confirmed
+- Processing
+- Out for delivery
+- Delivered
+- Cancelled
+
+Supabase requirements:
+- Use Supabase Auth for admin login
+- Use Supabase Storage for:
+  - product images
+  - category images
+  - banner/slide images
+  - site assets
+- Use Supabase Postgres for all structured data
+- Create proper database tables and relationships for:
+  - users
+  - roles
+  - audit_logs
+  - products
+  - product_images
+  - categories
+  - offers
+  - banners
+  - coupons
+  - orders
+  - order_items
+  - customers
+  - addresses
+  - settings
+  - seo_settings
+  - age_gate_settings
+- Add row-level security policies where appropriate
+- Keep storage and database structure clean and production-friendly
+
+SEO requirements:
+- Fully SEO optimized
+- Server-rendered metadata
+- Clean URLs
+- Product schema / structured data
+- Open Graph tags
+- Twitter cards
+- XML sitemap
+- robots.txt
+- Canonical tags
+- Optimized performance
+- SEO fields editable from dashboard
+
+Frontend design:
+- Premium dark elegant interface
+- DM Sans for body/UI
+- Playfair Display or Cormorant Garamond for selective headings
+- Sticky header
+- Smooth transitions
+- Clean cards
+- Soft hover states
+- Premium footer
+- Mobile responsive
+- Moodful tasteful styling
+
+Suggested color palette:
+- Background: #0B0B0F
+- Card: #14141A
+- Accent plum: #6F2C91
+- Soft rose: #C26D85
+- Champagne text: #E7D9C8
+- Muted text: #A1A1AA
+
+Seed with demo data:
+- categories
+- products
+- offers
+- banners
+- testimonials
+- FAQs
+
+Also generate:
+- database schema
+- Supabase table design
+- storage bucket structure
+- environment variable example
+- README
+- setup instructions for Replit
+- Vercel deployment notes
+- sample admin user seed
