@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ShoppingBag, Menu, X, Search } from "lucide-react";
+import { ShoppingBag, Menu, X } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { cn } from "@/lib/utils";
 import { useGetSettings } from "@workspace/api-client-react";
+import velvetLogo from "@/assets/velvet-logo.png";
 
 const navLinks = [
   { label: "Shop", href: "/shop" },
@@ -33,9 +34,12 @@ export function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/">
-              <span className="font-display text-2xl font-semibold cursor-pointer" style={{ color: "#E7D9C8", letterSpacing: "0.05em" }}>
-                {storeName}
-              </span>
+              <div className="flex items-center gap-2.5 cursor-pointer">
+                <img src={velvetLogo} alt={storeName} className="h-9 w-9 object-contain" />
+                <span className="font-sans text-lg font-light tracking-[0.15em] uppercase" style={{ color: "#E7D9C8" }}>
+                  {storeName}
+                </span>
+              </div>
             </Link>
 
             <nav className="hidden md:flex items-center gap-8">

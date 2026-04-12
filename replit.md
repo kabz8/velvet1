@@ -25,7 +25,8 @@ lib/
 
 ## Brand Identity
 
-- **Font:** Cormorant Garamond (single unified luxury serif)
+- **Font:** Inter (weight 300 thin throughout, 200 for display/hero text)
+- **Logo:** AI-generated visual mark at `artifacts/velvet-store/src/assets/velvet-logo.png`
 - **Background:** #0B0B0F (near-black)
 - **Card:** #14141A
 - **Plum accent:** #6F2C91

@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "Gj9FK4Ft_9wo9Hn8aAJ0_"
+uri = "file://artifacts/velvet-store/src/assets/velvet-logo.png"
+type = "image"
+title = "velvet brand logo mark"

@@ -1,8 +1,9 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, ShoppingCart, Tag, Image, Users, Settings, LogOut, Menu, X, BarChart2, MessageSquare, HelpCircle, Percent } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Tag, Image, Users, Settings, LogOut, Menu, X, MessageSquare, HelpCircle, Percent } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import velvetLogo from "@/assets/velvet-logo.png";
 
 const navItems = [
   { icon: <LayoutDashboard size={18} />, label: "Dashboard", href: "/admin" },
@@ -39,9 +40,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )} style={{ background: "#0E0E14", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="p-6 border-b flex items-center justify-between" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <div>
-            <h1 className="font-display text-xl font-semibold" style={{ color: "#E7D9C8" }}>Velvet</h1>
-            <p className="font-sans text-xs" style={{ color: "#A1A1AA" }}>Admin Dashboard</p>
+          <div className="flex items-center gap-2.5">
+            <img src={velvetLogo} alt="Velvet" className="h-8 w-8 object-contain" />
+            <div>
+              <h1 className="font-sans text-sm font-light tracking-[0.15em] uppercase" style={{ color: "#E7D9C8" }}>Velvet</h1>
+              <p className="font-sans text-xs font-light" style={{ color: "#A1A1AA" }}>Admin Dashboard</p>
+            </div>
           </div>
           <button className="lg:hidden p-1" onClick={() => setSidebarOpen(false)} style={{ color: "#A1A1AA" }}><X size={18} /></button>
         </div>
@@ -90,7 +94,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-lg" style={{ color: "#A1A1AA" }}>
             <Menu size={20} />
           </button>
-          <span className="font-display text-lg font-semibold" style={{ color: "#E7D9C8" }}>Velvet Admin</span>
+          <div className="flex items-center gap-2">
+            <img src={velvetLogo} alt="Velvet" className="h-7 w-7 object-contain" />
+            <span className="font-sans text-sm font-light tracking-[0.15em] uppercase" style={{ color: "#E7D9C8" }}>Velvet Admin</span>
+          </div>
         </header>
 
         <main className="flex-1 overflow-auto p-6">
