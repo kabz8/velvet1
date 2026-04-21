@@ -2,26 +2,19 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGetAgeGateSettings } from "@workspace/api-client-react";
 
-const AGE_KEY = "velvet_age_confirmed";
-const AGE_CONFIRMED_AT_KEY = "velvet_age_confirmed_at";
-const AGE_GATE_TTL_MS = 24 * 60 * 60 * 1000;
+const AGE_SESSION_KEY = "velvet_age_confirmed_session";
 
 export function AgeGate() {
   const [show, setShow] = useState(false);
   const { data: settings } = useGetAgeGateSettings();
 
   useEffect(() => {
-    const confirmed = localStorage.getItem(AGE_KEY);
-    const confirmedAt = Number(localStorage.getItem(AGE_CONFIRMED_AT_KEY) || "0");
-    const isRecent = Number.isFinite(confirmedAt) && Date.now() - confirmedAt < AGE_GATE_TTL_MS;
-    if (!confirmed || !isRecent) {
-      setShow(true);
-    }
+    const confirmed = sessionStorage.getItem(AGE_SESSION_KEY);
+    setShow(!confirmed);
   }, []);
 
   const confirm = () => {
-    localStorage.setItem(AGE_KEY, "1");
-    localStorage.setItem(AGE_CONFIRMED_AT_KEY, String(Date.now()));
+    sessionStorage.setItem(AGE_SESSION_KEY, "1");
     setShow(false);
   };
 

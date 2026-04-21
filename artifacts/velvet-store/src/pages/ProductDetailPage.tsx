@@ -228,7 +228,12 @@ export default function ProductDetailPage() {
               <button onClick={() => setQuantity(q => q + 1)} className="w-10 h-12 flex items-center justify-center text-lg hover:bg-white/5 rounded-r-xl transition-colors" style={{ color: "#A1A1AA" }}>+</button>
             </div>
             <button
-              onClick={() => addItem(resolvedProduct, quantity)}
+              type="button"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                addItem(resolvedProduct, quantity);
+              }}
               disabled={stockQuantity === 0}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-sans font-semibold text-sm tracking-wider uppercase transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: "linear-gradient(135deg, #6F2C91, #C26D85)", color: "#E7D9C8" }}
