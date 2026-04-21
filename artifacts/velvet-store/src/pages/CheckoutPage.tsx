@@ -3,7 +3,8 @@ import { useLocation } from "wouter";
 import { useCart } from "@/hooks/useCart";
 import { useCreateOrder, useValidateCoupon, useGetShippingSettings, useGetSettings } from "@workspace/api-client-react";
 import { formatKES, getImageUrl } from "@/lib/utils";
-import { Lock, Shield, Truck } from "lucide-react";
+import { Lock, Shield, MessageCircle } from "lucide-react";
+import { getSampleProductById } from "@/lib/sampleProducts";
 
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
@@ -26,6 +27,25 @@ export default function CheckoutPage() {
   const [couponApplied, setCouponApplied] = useState<{ discountAmount: number; code: string } | null>(null);
   const [couponError, setCouponError] = useState("");
 
+  const normalizedItems = items.map((item) => {
+    const sample = getSampleProductById(item.product.id);
+    const price =
+      typeof item.product.price === "number" && Number.isFinite(item.product.price) && item.product.price > 0
+        ? item.product.price
+        : sample?.price ?? 0;
+    const imageUrl = item.product.images?.[0]?.url || sample?.images?.[0]?.url || "/sample-product.png";
+    return {
+      ...item,
+      product: {
+        ...item.product,
+        title: item.product.title || sample?.title || `Product ${item.product.id}`,
+        price,
+        images: [{ id: 1, productId: item.product.id, url: imageUrl, altText: null, sortOrder: 0, isPrimary: true }],
+      },
+    };
+  });
+  const normalizedSubtotal = normalizedItems.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+
   const createOrder = useCreateOrder();
   const validateCoupon = useValidateCoupon();
 
@@ -33,13 +53,15 @@ export default function CheckoutPage() {
   const outsideFee = shippingSettings?.outsideNairobiFee ?? 450;
   const shippingFee = form.deliveryRegion === "nairobi" ? nairobiFee : outsideFee;
   const discount = couponApplied?.discountAmount ?? 0;
-  const total = subtotal + shippingFee - discount;
+  const total = normalizedSubtotal + shippingFee - discount;
+  const whatsappPhoneRaw = siteSettings?.socialWhatsapp || siteSettings?.storePhone || "";
+  const whatsappPhone = whatsappPhoneRaw.replace(/[^\d]/g, "");
 
   const handleCouponValidate = async () => {
     setCouponError("");
     if (!form.couponCode.trim()) return;
     try {
-      const result = await validateCoupon.mutateAsync({ code: form.couponCode, orderAmount: subtotal });
+      const result = await validateCoupon.mutateAsync({ code: form.couponCode, orderAmount: normalizedSubtotal });
       if (result.valid) {
         setCouponApplied({ discountAmount: result.discountAmount, code: form.couponCode });
       } else {
@@ -50,9 +72,38 @@ export default function CheckoutPage() {
     }
   };
 
+  const handleWhatsAppCheckout = () => {
+    const itemLines = normalizedItems
+      .map((item) => `- ${item.product.title} x${item.quantity} (${formatKES(item.product.price * item.quantity)})`)
+      .join("\n");
+    const message = [
+      "Hello, I would like to place an order:",
+      "",
+      itemLines,
+      "",
+      `Subtotal: ${formatKES(normalizedSubtotal)}`,
+      `Shipping: ${formatKES(shippingFee)}`,
+      `Total: ${formatKES(total)}`,
+      "",
+      `Phone: ${form.customerPhone || "-"}`,
+      `Name: ${form.isAnonymous ? "Anonymous" : (form.customerName || "-")}`,
+      `Address: ${form.deliveryAddress || "-"}`,
+      `Region: ${form.deliveryRegion === "nairobi" ? "Nairobi" : "Outside Nairobi"}`,
+    ].join("\n");
+
+    const waUrl = whatsappPhone
+      ? `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`
+      : `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, "_blank", "noopener,noreferrer");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) return;
+    if (normalizedItems.some((item) => item.product.id >= 9000)) {
+      alert("Sample products cannot be submitted as live orders yet. Please use Checkout via WhatsApp.");
+      return;
+    }
     try {
       const order = await createOrder.mutateAsync({
         customerName: form.isAnonymous ? null : form.customerName || null,
@@ -64,12 +115,13 @@ export default function CheckoutPage() {
         notes: form.notes || null,
         couponCode: couponApplied?.code || null,
         paymentMethod: form.paymentMethod,
-        items: items.map(i => ({ productId: i.product.id, quantity: i.quantity })),
+        items: normalizedItems.map(i => ({ productId: i.product.id, quantity: i.quantity })),
       });
       clearCart();
       navigate(`/order-confirmation/${order.id}`);
-    } catch (err) {
-      alert("Failed to place order. Please try again.");
+    } catch (err: any) {
+      const message = err?.data?.error || err?.message || "Failed to place order. Please try again.";
+      alert(message);
     }
   };
 
@@ -178,7 +230,7 @@ export default function CheckoutPage() {
               <h2 className="font-display text-xl font-semibold mb-5" style={{ color: "#E7D9C8" }}>Order Summary</h2>
 
               <div className="space-y-3 mb-5 pb-5 border-b" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-                {items.map(item => (
+                {normalizedItems.map(item => (
                   <div key={item.product.id} className="flex gap-3">
                     <img src={getImageUrl(item.product.images?.[0]?.url)} alt={item.product.title} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
                     <div className="flex-1 min-w-0">
@@ -204,7 +256,7 @@ export default function CheckoutPage() {
               <div className="space-y-2 py-4 border-t border-b" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                 <div className="flex justify-between">
                   <span className="font-sans text-sm" style={{ color: "#A1A1AA" }}>Subtotal</span>
-                  <span className="font-sans text-sm" style={{ color: "#E7D9C8" }}>{formatKES(subtotal)}</span>
+                  <span className="font-sans text-sm" style={{ color: "#E7D9C8" }}>{formatKES(normalizedSubtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-sans text-sm" style={{ color: "#A1A1AA" }}>Shipping</span>
@@ -225,6 +277,15 @@ export default function CheckoutPage() {
               <button type="submit" disabled={createOrder.isPending} className="w-full py-4 rounded-xl font-sans font-semibold text-sm tracking-wider uppercase transition-all hover:opacity-90 disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg, #6F2C91, #C26D85)", color: "#E7D9C8" }}>
                 {createOrder.isPending ? "Placing Order..." : "Place Order"}
+              </button>
+              <button
+                type="button"
+                onClick={handleWhatsAppCheckout}
+                className="w-full py-3 mt-3 rounded-xl font-sans font-semibold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
+                style={{ background: "#25D366", color: "#0B0B0F" }}
+              >
+                <MessageCircle size={16} />
+                Checkout via WhatsApp
               </button>
 
               <div className="flex items-center justify-center gap-2 mt-4">
