@@ -18,7 +18,7 @@ export default function ProductDetailPage() {
   const { addItem } = useCart();
   const fallbackProduct = getSampleProductById(id);
   const resolvedProduct = product ?? fallbackProduct;
-  const resolvedRelated = related.length > 0 ? related : getSampleRelatedProducts(id);
+  const resolvedRelated = Array.isArray(related) && related.length > 0 ? related : getSampleRelatedProducts(id);
 
   if (isLoading) {
     return (
@@ -43,7 +43,10 @@ export default function ProductDetailPage() {
     );
   }
 
-  const images = resolvedProduct.images || [];
+  const images = Array.isArray(resolvedProduct.images)
+    ? resolvedProduct.images.filter((img) => img && typeof img.url === "string")
+    : [];
+  const tags = Array.isArray(resolvedProduct.tags) ? resolvedProduct.tags : [];
   const currentImage = images[selectedImageIndex] || images[0];
   const isOnSale = resolvedProduct.compareAtPrice && resolvedProduct.compareAtPrice > resolvedProduct.price;
 
@@ -145,9 +148,9 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {resolvedProduct.tags && resolvedProduct.tags.length > 0 && (
+          {tags.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
-              {resolvedProduct.tags.map(tag => (
+              {tags.map(tag => (
                 <span key={tag} className="text-xs font-sans px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.05)", color: "#A1A1AA" }}>{tag}</span>
               ))}
             </div>

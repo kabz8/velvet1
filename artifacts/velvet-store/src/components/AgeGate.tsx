@@ -22,13 +22,16 @@ export function AgeGate() {
     window.location.href = "https://www.google.com";
   };
 
-  if (!settings) return null;
-  if (!settings.enabled) return null;
+  const settingsObj = settings && typeof settings === "object" ? settings : {};
+  const enabled = (settingsObj as { enabled?: unknown }).enabled;
+  const isEnabled = typeof enabled === "boolean" ? enabled : true;
+  if (!isEnabled) return null;
 
-  const title = settings.title || "Adults Only";
-  const message = settings.message || "This store contains products intended for adults 18 years of age and older.";
-  const confirmLabel = settings.confirmLabel || "I am 18+, Enter";
-  const exitLabel = settings.exitLabel || "Exit";
+  const title = (settingsObj as { title?: string }).title || "Adults Only";
+  const message = (settingsObj as { message?: string }).message || "This store contains products intended for adults 18 years of age and older.";
+  const confirmLabel = (settingsObj as { confirmLabel?: string }).confirmLabel || "I am 18+, Enter";
+  const exitLabel = (settingsObj as { exitLabel?: string }).exitLabel || "Exit";
+  const backgroundImageUrl = (settingsObj as { backgroundImageUrl?: string | null }).backgroundImageUrl;
 
   return (
     <AnimatePresence>
@@ -39,8 +42,8 @@ export function AgeGate() {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[9999] flex items-center justify-center"
           style={{
-            background: settings.backgroundImageUrl
-              ? `url(${settings.backgroundImageUrl}) center/cover`
+            background: backgroundImageUrl
+              ? `url(${backgroundImageUrl}) center/cover`
               : "linear-gradient(135deg, #0B0B0F 0%, #1A0A2E 50%, #0B0B0F 100%)",
           }}
         >
