@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { ShoppingBag } from "lucide-react";
-import type { MouseEvent } from "react";
+import type { MouseEvent, TouchEvent } from "react";
 import { formatKES, getImageUrl } from "@/lib/utils";
 import { useCart } from "@/hooks/useCart";
 import type { Product } from "@workspace/api-client-react";
@@ -15,7 +15,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const { addItem } = useCart();
   const primaryImage = product.images?.find(i => i.isPrimary) || product.images?.[0];
   const isOnSale = product.compareAtPrice && product.compareAtPrice > product.price;
-  const handleAddToCart = (event: MouseEvent<HTMLButtonElement>) => {
+  const handleAddToCart = (event: MouseEvent<HTMLButtonElement> | TouchEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
     addItem(product);
@@ -66,7 +66,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <button
             type="button"
             onClick={handleAddToCart}
-            className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 hover:opacity-80"
+            onTouchEnd={handleAddToCart}
+            className="relative z-20 w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 hover:opacity-80 active:scale-95"
             style={{ background: "rgba(111,44,145,0.2)", color: "#C26D85", border: "1px solid rgba(111,44,145,0.4)" }}
             aria-label={`Add ${product.title} to cart`}
           >

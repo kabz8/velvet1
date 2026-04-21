@@ -36,22 +36,26 @@ function toRecord(value: unknown): Record<string, unknown> {
 function normalizeProduct(product: unknown): Product | null {
   const record = toRecord(product);
   const nested = toRecord(record.product);
-  const id = toFiniteNumber(record.id ?? nested.id, -1);
+  const nestedProducts = toRecord(record.products);
+  const id = toFiniteNumber(record.id ?? nested.id ?? nestedProducts.id, -1);
   if (id <= 0) return null;
 
   const title =
     (typeof record.title === "string" && record.title) ||
     (typeof nested.title === "string" && nested.title) ||
+    (typeof nestedProducts.title === "string" && nestedProducts.title) ||
     `Product ${id}`;
 
-  const price = toFiniteNumber(record.price ?? nested.price, 0);
-  const compareAtPriceRaw = record.compareAtPrice ?? nested.compareAtPrice;
+  const price = toFiniteNumber(record.price ?? nested.price ?? nestedProducts.price, 0);
+  const compareAtPriceRaw = record.compareAtPrice ?? nested.compareAtPrice ?? nestedProducts.compareAtPrice;
   const compareAtPrice = compareAtPriceRaw == null ? null : toFiniteNumber(compareAtPriceRaw, 0);
 
   const rawImages = Array.isArray(record.images)
     ? record.images
     : Array.isArray(nested.images)
       ? nested.images
+      : Array.isArray(nestedProducts.images)
+        ? nestedProducts.images
       : [];
   const images = rawImages
     .map((image, index) => {
@@ -71,6 +75,11 @@ function normalizeProduct(product: unknown): Product | null {
 
   const tagsRaw = Array.isArray(record.tags) ? record.tags : Array.isArray(nested.tags) ? nested.tags : [];
   const tags = tagsRaw.filter((tag): tag is string => typeof tag === "string");
+  const tagsWithNestedProducts = tags.length > 0
+    ? tags
+    : Array.isArray(nestedProducts.tags)
+      ? nestedProducts.tags.filter((tag): tag is string => typeof tag === "string")
+      : [];
 
   return {
     id,
@@ -86,22 +95,24 @@ function normalizeProduct(product: unknown): Product | null {
     shortDescription:
       (typeof record.shortDescription === "string" && record.shortDescription) ||
       (typeof nested.shortDescription === "string" && nested.shortDescription) ||
+      (typeof nestedProducts.shortDescription === "string" && nestedProducts.shortDescription) ||
       "",
     description:
       (typeof record.description === "string" && record.description) ||
       (typeof nested.description === "string" && nested.description) ||
+      (typeof nestedProducts.description === "string" && nestedProducts.description) ||
       "",
     price,
     compareAtPrice,
-    stockQuantity: toFiniteNumber(record.stockQuantity ?? nested.stockQuantity, 0),
+    stockQuantity: toFiniteNumber(record.stockQuantity ?? nested.stockQuantity ?? nestedProducts.stockQuantity, 0),
     categoryId: null,
     category: null,
-    tags,
-    images,
-    featured: Boolean(record.featured ?? nested.featured ?? false),
-    isOffer: Boolean(record.isOffer ?? nested.isOffer ?? false),
-    isBestSeller: Boolean(record.isBestSeller ?? nested.isBestSeller ?? false),
-    isNewArrival: Boolean(record.isNewArrival ?? nested.isNewArrival ?? false),
+    tags: tagsWithNestedProducts,
+    images: images.length > 0 ? images : [{ id: 1, productId: id, url: "/sample-product.png", altText: null, sortOrder: 0, isPrimary: true }],
+    featured: Boolean(record.featured ?? nested.featured ?? nestedProducts.featured ?? false),
+    isOffer: Boolean(record.isOffer ?? nested.isOffer ?? nestedProducts.isOffer ?? false),
+    isBestSeller: Boolean(record.isBestSeller ?? nested.isBestSeller ?? nestedProducts.isBestSeller ?? false),
+    isNewArrival: Boolean(record.isNewArrival ?? nested.isNewArrival ?? nestedProducts.isNewArrival ?? false),
     status: "published",
     seoTitle: null,
     seoDescription: null,
