@@ -4,7 +4,12 @@ import { getImageUrl } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 
 export default function CategoryPage() {
-  const { data: categories = [], isLoading } = useListCategories();
+  const { data: categoriesData, isLoading } = useListCategories();
+  const categories = Array.isArray(categoriesData)
+    ? categoriesData
+    : Array.isArray((categoriesData as { categories?: unknown } | undefined)?.categories)
+      ? ((categoriesData as { categories: typeof categoriesData }).categories as Array<{ id: number; name: string; imageUrl?: string | null; description?: string | null }>)
+      : [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

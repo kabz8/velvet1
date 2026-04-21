@@ -19,7 +19,12 @@ export default function ShopPage() {
   const [isOffer, setIsOffer] = useState(params.get("isOffer") === "true");
   const [inStock, setInStock] = useState(false);
 
-  const { data: categories = [] } = useListCategories();
+  const { data: categoriesData } = useListCategories();
+  const categories = Array.isArray(categoriesData)
+    ? categoriesData
+    : Array.isArray((categoriesData as { categories?: unknown } | undefined)?.categories)
+      ? ((categoriesData as { categories: typeof categoriesData }).categories as Array<{ id: number; name: string }>)
+      : [];
   const { data, isLoading } = useListProducts({
     params: {
       page,
