@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap');
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -128,8 +128,8 @@
   --chart-4: 200 50% 50%;
   --chart-5: 160 40% 45%;
 
-  --app-font-sans: 'Inter', system-ui, sans-serif;
-  --app-font-serif: 'Inter', system-ui, sans-serif;
+  --app-font-sans: 'Outfit', system-ui, sans-serif;
+  --app-font-serif: 'Outfit', system-ui, sans-serif;
   --app-font-mono: Menlo, monospace;
   --radius: 0.5rem;
 
@@ -215,33 +215,33 @@
   }
   body {
     @apply antialiased bg-background text-foreground;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Outfit', system-ui, sans-serif;
     font-weight: 300;
     letter-spacing: 0.01em;
     min-height: 100vh;
   }
   h1 {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Outfit', system-ui, sans-serif;
     font-weight: 600;
     letter-spacing: 0.01em;
   }
   h2 {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Outfit', system-ui, sans-serif;
     font-weight: 500;
     letter-spacing: 0.01em;
   }
   h3, h4 {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Outfit', system-ui, sans-serif;
     font-weight: 500;
     letter-spacing: 0.01em;
   }
   h5, h6 {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Outfit', system-ui, sans-serif;
     font-weight: 400;
     letter-spacing: 0.01em;
   }
   button, input, select, textarea, label {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Outfit', system-ui, sans-serif;
     font-weight: 300;
   }
 }
@@ -251,7 +251,7 @@
     @apply hidden;
   }
   .font-display {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Outfit', system-ui, sans-serif;
     font-weight: 500;
     letter-spacing: 0.04em;
   }

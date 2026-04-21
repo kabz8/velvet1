@@ -1,10 +1,13 @@
 import { useListProducts } from "@workspace/api-client-react";
 import { ProductCard } from "@/components/ProductCard";
 import { Tag } from "lucide-react";
+import { SAMPLE_PRODUCTS } from "@/lib/sampleProducts";
 
 export default function OffersPage() {
   const { data, isLoading } = useListProducts({ params: { isOffer: true, limit: 24 } });
-  const products = data?.products || [];
+  const products = data?.products?.length
+    ? data.products
+    : SAMPLE_PRODUCTS.filter((product) => product.isOffer);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

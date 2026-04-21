@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Lock, Truck, Shield, Star, ChevronDown } fro
 import { useGetFeaturedProducts, useListBanners, useListTestimonials, useListFaqs } from "@workspace/api-client-react";
 import { ProductCard } from "@/components/ProductCard";
 import { getImageUrl, formatKES } from "@/lib/utils";
+import { getSampleFeaturedProducts } from "@/lib/sampleProducts";
 
 const fadeInUp = { initial: { opacity: 0, y: 30 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6 } };
 
@@ -117,7 +118,8 @@ export default function HomePage() {
   const { data: faqsData } = useListFaqs();
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
-  const featured = featuredData && typeof featuredData === "object" ? featuredData : null;
+  const featuredFallback = getSampleFeaturedProducts();
+  const featured = featuredData && typeof featuredData === "object" ? featuredData : featuredFallback;
   const testimonials = Array.isArray(testimonialsData)
     ? testimonialsData
     : Array.isArray((testimonialsData as { testimonials?: unknown } | undefined)?.testimonials)

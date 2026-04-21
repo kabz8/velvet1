@@ -3,6 +3,7 @@ import { Search, SlidersHorizontal, X, ChevronDown } from "lucide-react";
 import { useListProducts, useListCategories } from "@workspace/api-client-react";
 import { ProductCard } from "@/components/ProductCard";
 import { useLocation } from "wouter";
+import { getSampleProductList } from "@/lib/sampleProducts";
 
 export default function ShopPage() {
   const [location] = useLocation();
@@ -33,15 +34,17 @@ export default function ShopPage() {
     },
   });
 
-  const products = data?.products || [];
-  const totalPages = data?.totalPages || 1;
+  const fallback = getSampleProductList();
+  const products = (data?.products?.length ? data.products : fallback.products);
+  const totalCount = data?.total && data.total > 0 ? data.total : fallback.total;
+  const totalPages = data?.totalPages && data.totalPages > 0 ? data.totalPages : fallback.totalPages;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-8">
         <h1 className="font-display text-4xl font-semibold mb-2" style={{ color: "#E7D9C8" }}>Our Collection</h1>
         <p className="font-sans text-sm" style={{ color: "#A1A1AA" }}>
-          {data?.total ? `${data.total} products` : "Exploring our curated selection"}
+          {`${totalCount} products`}
         </p>
       </div>
 
