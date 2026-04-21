@@ -5,8 +5,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatKES(amount: number): string {
-  return `KES ${amount.toLocaleString("en-KE", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+export function formatKES(amount: number | string | null | undefined): string {
+  const normalized =
+    typeof amount === "number"
+      ? amount
+      : typeof amount === "string"
+        ? Number(amount)
+        : Number.NaN;
+  const safeAmount = Number.isFinite(normalized) ? normalized : 0;
+  return `KES ${safeAmount.toLocaleString("en-KE", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
 export function getImageUrl(url: string | null | undefined): string {
