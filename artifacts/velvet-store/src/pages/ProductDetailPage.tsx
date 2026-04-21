@@ -37,8 +37,59 @@ function resolveCompareAtPrice(product: unknown): number | null {
     : {}) as Record<string, unknown>;
   return (
     toFiniteNumber(record.compareAtPrice) ??
+    toFiniteNumber(record.compare_at_price) ??
     toFiniteNumber(nested.compareAtPrice)
   );
+}
+
+function toRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+}
+
+function normalizeImages(product: unknown, fallbackUrl = "/sample-product.png") {
+  const record = toRecord(product);
+  const nestedProduct = toRecord(record.product);
+  const nestedProducts = toRecord(record.products);
+
+  const rawImages =
+    (Array.isArray(record.images) && record.images) ||
+    (Array.isArray(nestedProduct.images) && nestedProduct.images) ||
+    (Array.isArray(nestedProducts.images) && nestedProducts.images) ||
+    (Array.isArray(record.productImages) && record.productImages) ||
+    (Array.isArray(record.product_images) && record.product_images) ||
+    [];
+
+  const normalized = rawImages
+    .map((img, index) => {
+      const item = toRecord(img);
+      const url =
+        (typeof item.url === "string" && item.url) ||
+        (typeof item.imageUrl === "string" && item.imageUrl) ||
+        (typeof item.image_url === "string" && item.image_url) ||
+        null;
+      if (!url) return null;
+      return {
+        id: typeof item.id === "number" ? item.id : index + 1,
+        productId: typeof item.productId === "number" ? item.productId : 0,
+        url,
+        altText: typeof item.altText === "string" ? item.altText : null,
+        sortOrder: typeof item.sortOrder === "number" ? item.sortOrder : index,
+        isPrimary: Boolean(item.isPrimary ?? index === 0),
+      };
+    })
+    .filter((img): img is NonNullable<typeof img> => Boolean(img));
+
+  if (normalized.length > 0) return normalized;
+  return [
+    {
+      id: 1,
+      productId: 0,
+      url: fallbackUrl,
+      altText: "Product image",
+      sortOrder: 0,
+      isPrimary: true,
+    },
+  ];
 }
 
 export default function ProductDetailPage() {
@@ -77,12 +128,40 @@ export default function ProductDetailPage() {
     );
   }
 
-  const images = Array.isArray(resolvedProduct.images)
-    ? resolvedProduct.images.filter((img) => img && typeof img.url === "string")
-    : [];
-  const tags = Array.isArray(resolvedProduct.tags) ? resolvedProduct.tags : [];
+  const record = toRecord(resolvedProduct);
+  const nestedProduct = toRecord(record.product);
+  const nestedProducts = toRecord(record.products);
+  const images = normalizeImages(resolvedProduct, fallbackProduct?.images?.[0]?.url || "/sample-product.png");
+  const tagsRaw =
+    (Array.isArray(record.tags) && record.tags) ||
+    (Array.isArray(nestedProduct.tags) && nestedProduct.tags) ||
+    (Array.isArray(nestedProducts.tags) && nestedProducts.tags) ||
+    [];
+  const tags = tagsRaw.filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0);
   const price = resolveProductPrice(resolvedProduct, fallbackProduct?.price ?? 0);
   const compareAtPrice = resolveCompareAtPrice(resolvedProduct);
+  const title =
+    (typeof record.title === "string" && record.title) ||
+    (typeof nestedProduct.title === "string" && nestedProduct.title) ||
+    (typeof nestedProducts.title === "string" && nestedProducts.title) ||
+    fallbackProduct?.title ||
+    "Product";
+  const shortDescription =
+    (typeof record.shortDescription === "string" && record.shortDescription) ||
+    (typeof nestedProduct.shortDescription === "string" && nestedProduct.shortDescription) ||
+    (typeof nestedProducts.shortDescription === "string" && nestedProducts.shortDescription) ||
+    "";
+  const description =
+    (typeof record.description === "string" && record.description) ||
+    (typeof nestedProduct.description === "string" && nestedProduct.description) ||
+    (typeof nestedProducts.description === "string" && nestedProducts.description) ||
+    "";
+  const stockQuantity =
+    toFiniteNumber(record.stockQuantity) ??
+    toFiniteNumber(nestedProduct.stockQuantity) ??
+    toFiniteNumber(nestedProducts.stockQuantity) ??
+    fallbackProduct?.stockQuantity ??
+    0;
   const currentImage = images[selectedImageIndex] || images[0];
   const isOnSale = compareAtPrice != null && compareAtPrice > price;
 
@@ -99,7 +178,7 @@ export default function ProductDetailPage() {
         {/* Image gallery */}
         <div className="space-y-4">
           <div className="aspect-square rounded-2xl overflow-hidden" style={{ background: "#14141A" }}>
-            <img src={getImageUrl(currentImage?.url)} alt={resolvedProduct.title} className="w-full h-full object-cover" />
+            <img src={getImageUrl(currentImage?.url)} alt={title} className="w-full h-full object-cover" />
           </div>
           {images.length > 1 && (
             <div className="flex gap-3">
@@ -125,7 +204,7 @@ export default function ProductDetailPage() {
             {resolvedProduct.isOffer && <span className="text-xs font-sans px-2 py-1 rounded-full" style={{ background: "rgba(231,217,200,0.15)", color: "#E7D9C8" }}>Special Offer</span>}
           </div>
 
-          <h1 className="font-display text-4xl font-semibold mb-2" style={{ color: "#E7D9C8" }}>{resolvedProduct.title}</h1>
+          <h1 className="font-display text-4xl font-semibold mb-2" style={{ color: "#E7D9C8" }}>{title}</h1>
 
           {resolvedProduct.category && (
             <Link href={`/shop?categoryId=${resolvedProduct.category.id}`}>
@@ -138,8 +217,8 @@ export default function ProductDetailPage() {
             {isOnSale && <span className="font-sans text-lg line-through" style={{ color: "#A1A1AA" }}>{formatKES(compareAtPrice!)}</span>}
           </div>
 
-          {resolvedProduct.shortDescription && (
-            <p className="font-sans text-sm leading-relaxed mb-6" style={{ color: "#A1A1AA" }}>{resolvedProduct.shortDescription}</p>
+          {shortDescription && (
+            <p className="font-sans text-sm leading-relaxed mb-6" style={{ color: "#A1A1AA" }}>{shortDescription}</p>
           )}
 
           <div className="flex items-center gap-4 mb-6">
@@ -150,17 +229,17 @@ export default function ProductDetailPage() {
             </div>
             <button
               onClick={() => addItem(resolvedProduct, quantity)}
-              disabled={resolvedProduct.stockQuantity === 0}
+              disabled={stockQuantity === 0}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-sans font-semibold text-sm tracking-wider uppercase transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: "linear-gradient(135deg, #6F2C91, #C26D85)", color: "#E7D9C8" }}
             >
               <ShoppingBag size={16} />
-              {resolvedProduct.stockQuantity === 0 ? "Out of Stock" : "Add to Bag"}
+              {stockQuantity === 0 ? "Out of Stock" : "Add to Bag"}
             </button>
           </div>
 
-          {resolvedProduct.stockQuantity > 0 && resolvedProduct.stockQuantity < 5 && (
-            <p className="font-sans text-xs mb-4" style={{ color: "#C26D85" }}>Only {resolvedProduct.stockQuantity} left in stock</p>
+          {stockQuantity > 0 && stockQuantity < 5 && (
+            <p className="font-sans text-xs mb-4" style={{ color: "#C26D85" }}>Only {stockQuantity} left in stock</p>
           )}
 
           {/* Trust badges */}
@@ -177,10 +256,10 @@ export default function ProductDetailPage() {
             ))}
           </div>
 
-          {resolvedProduct.description && (
+          {description && (
             <div className="mt-6">
               <h3 className="font-sans font-semibold text-sm mb-3" style={{ color: "#E7D9C8" }}>Description</h3>
-              <p className="font-sans text-sm leading-relaxed" style={{ color: "#A1A1AA" }}>{resolvedProduct.description}</p>
+              <p className="font-sans text-sm leading-relaxed" style={{ color: "#A1A1AA" }}>{description}</p>
             </div>
           )}
 
