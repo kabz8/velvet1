@@ -65,8 +65,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </div>
           <button
             type="button"
-            onClick={handleAddToCart}
-            onPointerUp={handleAddToCart}
+            onPointerDown={handleAddToCart}
             className="relative z-20 w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 hover:opacity-80 active:scale-95"
             style={{ background: "rgba(111,44,145,0.2)", color: "#C26D85", border: "1px solid rgba(111,44,145,0.4)", touchAction: "manipulation" }}
             aria-label={`Add ${product.title} to cart`}

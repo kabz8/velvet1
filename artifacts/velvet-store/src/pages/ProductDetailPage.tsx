@@ -229,10 +229,10 @@ export default function ProductDetailPage() {
             </div>
             <button
               type="button"
-              onClick={(event) => {
+              onPointerDown={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                addItem(resolvedProduct, quantity);
+                addItem({ ...(resolvedProduct as any), id: (resolvedProduct as any)?.id ?? id }, quantity);
               }}
               disabled={stockQuantity === 0}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-sans font-semibold text-sm tracking-wider uppercase transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"

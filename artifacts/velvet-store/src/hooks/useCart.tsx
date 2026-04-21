@@ -33,11 +33,20 @@ function toRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 }
 
+function hashString(input: string): number {
+  let hash = 0;
+  for (let i = 0; i < input.length; i += 1) {
+    hash = (hash << 5) - hash + input.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash) || 1;
+}
+
 function normalizeProduct(product: unknown): Product | null {
   const record = toRecord(product);
   const nested = toRecord(record.product);
   const nestedProducts = toRecord(record.products);
-  const id = toFiniteNumber(
+  const rawId = toFiniteNumber(
     record.id ??
       record.productId ??
       record.product_id ??
@@ -49,13 +58,18 @@ function normalizeProduct(product: unknown): Product | null {
       nestedProducts.product_id,
     -1,
   );
-  if (id <= 0) return null;
 
   const title =
     (typeof record.title === "string" && record.title) ||
     (typeof nested.title === "string" && nested.title) ||
     (typeof nestedProducts.title === "string" && nestedProducts.title) ||
-    `Product ${id}`;
+    "Product";
+  const slugFromData =
+    (typeof record.slug === "string" && record.slug) ||
+    (typeof nested.slug === "string" && nested.slug) ||
+    (typeof nestedProducts.slug === "string" && nestedProducts.slug) ||
+    "";
+  const id = rawId > 0 ? rawId : hashString(`${slugFromData || title}-fallback`);
 
   const price = toFiniteNumber(record.price ?? nested.price ?? nestedProducts.price, 0);
   const compareAtPriceRaw = record.compareAtPrice ?? nested.compareAtPrice ?? nestedProducts.compareAtPrice;
@@ -96,9 +110,7 @@ function normalizeProduct(product: unknown): Product | null {
     id,
     title,
     slug:
-      (typeof record.slug === "string" && record.slug) ||
-      (typeof nested.slug === "string" && nested.slug) ||
-      `product-${id}`,
+      slugFromData || `product-${id}`,
     sku:
       (typeof record.sku === "string" && record.sku) ||
       (typeof nested.sku === "string" && nested.sku) ||
