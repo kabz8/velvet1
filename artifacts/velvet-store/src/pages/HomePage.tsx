@@ -9,7 +9,12 @@ import { getImageUrl, formatKES } from "@/lib/utils";
 const fadeInUp = { initial: { opacity: 0, y: 30 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6 } };
 
 function BannerSlider() {
-  const { data: banners = [] } = useListBanners({ params: {} });
+  const { data: bannersData } = useListBanners({ params: {} });
+  const banners = Array.isArray(bannersData)
+    ? bannersData
+    : Array.isArray((bannersData as { banners?: unknown } | undefined)?.banners)
+      ? ((bannersData as { banners: typeof bannersData }).banners as unknown[])
+      : [];
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -107,10 +112,22 @@ function TrustBadges() {
 }
 
 export default function HomePage() {
-  const { data: featured } = useGetFeaturedProducts();
-  const { data: testimonials = [] } = useListTestimonials();
-  const { data: faqs = [] } = useListFaqs();
+  const { data: featuredData } = useGetFeaturedProducts();
+  const { data: testimonialsData } = useListTestimonials();
+  const { data: faqsData } = useListFaqs();
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+
+  const featured = featuredData && typeof featuredData === "object" ? featuredData : null;
+  const testimonials = Array.isArray(testimonialsData)
+    ? testimonialsData
+    : Array.isArray((testimonialsData as { testimonials?: unknown } | undefined)?.testimonials)
+      ? ((testimonialsData as { testimonials: typeof testimonialsData }).testimonials as unknown[])
+      : [];
+  const faqs = Array.isArray(faqsData)
+    ? faqsData
+    : Array.isArray((faqsData as { faqs?: unknown } | undefined)?.faqs)
+      ? ((faqsData as { faqs: typeof faqsData }).faqs as unknown[])
+      : [];
 
   return (
     <div>
