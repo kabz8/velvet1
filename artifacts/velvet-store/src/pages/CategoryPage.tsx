@@ -3,13 +3,30 @@ import { useListCategories } from "@workspace/api-client-react";
 import { getImageUrl } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 
+const fallbackCategories = [
+  { id: 1, name: "Best Sellers", description: "Top-rated customer favorites", imageUrl: "/sample-product.png" },
+  { id: 2, name: "New Arrivals", description: "Fresh additions to the collection", imageUrl: "/sample-product.png" },
+  { id: 3, name: "Special Offers", description: "Limited-time premium deals", imageUrl: "/sample-product.png" },
+];
+
+function isCategoryLike(value: unknown): value is { id: number; name: string; imageUrl?: string | null; description?: string | null } {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      typeof (value as { id?: unknown }).id === "number" &&
+      typeof (value as { name?: unknown }).name === "string",
+  );
+}
+
 export default function CategoryPage() {
   const { data: categoriesData, isLoading } = useListCategories();
-  const categories = Array.isArray(categoriesData)
+  const rawCategories = Array.isArray(categoriesData)
     ? categoriesData
     : Array.isArray((categoriesData as { categories?: unknown } | undefined)?.categories)
       ? ((categoriesData as { categories: typeof categoriesData }).categories as Array<{ id: number; name: string; imageUrl?: string | null; description?: string | null }>)
       : [];
+  const categories = rawCategories.filter(isCategoryLike);
+  const displayCategories = categories.length > 0 ? categories : fallbackCategories;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -26,7 +43,7 @@ export default function CategoryPage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-          {categories.map(cat => (
+          {displayCategories.map(cat => (
             <Link key={cat.id} href={`/shop?categoryId=${cat.id}`}>
               <div className="group relative rounded-2xl overflow-hidden cursor-pointer" style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
                 <div className="aspect-video">

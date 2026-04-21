@@ -11,6 +11,7 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { AdminLayout } from "@/components/AdminLayout";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/HomePage";
@@ -35,6 +36,38 @@ import AdminCustomersPage from "@/pages/admin/AdminCustomersPage";
 import AdminSettingsPage from "@/pages/admin/AdminSettingsPage";
 import AdminTestimonialsPage from "@/pages/admin/AdminTestimonialsPage";
 import AdminFaqsPage from "@/pages/admin/AdminFaqsPage";
+
+type AppErrorBoundaryState = {
+  hasError: boolean;
+};
+
+class AppErrorBoundary extends Component<{ children: ReactNode }, AppErrorBoundaryState> {
+  state: AppErrorBoundaryState = { hasError: false };
+
+  static getDerivedStateFromError(): AppErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("App render error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center px-6 text-center" style={{ background: "#0B0B0F" }}>
+          <div>
+            <h1 className="font-display text-3xl mb-3" style={{ color: "#E7D9C8" }}>Something went wrong</h1>
+            <p className="font-sans text-sm" style={{ color: "#A1A1AA" }}>
+              Please refresh this page. If the problem continues, contact support.
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -173,9 +206,11 @@ function App() {
       <TooltipProvider>
         <AuthProvider>
           <CartProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
+            <AppErrorBoundary>
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <Router />
+              </WouterRouter>
+            </AppErrorBoundary>
           </CartProvider>
         </AuthProvider>
         <Toaster />

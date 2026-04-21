@@ -5,6 +5,15 @@ import { ProductCard } from "@/components/ProductCard";
 import { useLocation } from "wouter";
 import { getSampleProductList } from "@/lib/sampleProducts";
 
+function isCategoryLike(value: unknown): value is { id: number; name: string } {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      typeof (value as { id?: unknown }).id === "number" &&
+      typeof (value as { name?: unknown }).name === "string",
+  );
+}
+
 export default function ShopPage() {
   const [location] = useLocation();
   const params = new URLSearchParams(location.includes("?") ? location.split("?")[1] : "");
@@ -25,6 +34,7 @@ export default function ShopPage() {
     : Array.isArray((categoriesData as { categories?: unknown } | undefined)?.categories)
       ? ((categoriesData as { categories: typeof categoriesData }).categories as Array<{ id: number; name: string }>)
       : [];
+  const safeCategories = categories.filter(isCategoryLike);
   const { data, isLoading } = useListProducts({
     params: {
       page,
@@ -99,7 +109,7 @@ export default function ShopPage() {
               >
                 All
               </button>
-              {categories.map(cat => (
+              {safeCategories.map(cat => (
                 <button
                   key={cat.id}
                   onClick={() => setCategoryId(categoryId === cat.id ? undefined : cat.id)}
