@@ -7,6 +7,40 @@ import { useCart } from "@/hooks/useCart";
 import { formatKES, getImageUrl } from "@/lib/utils";
 import { getSampleProductById, getSampleRelatedProducts } from "@/lib/sampleProducts";
 
+function toFiniteNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function resolveProductPrice(product: unknown, fallbackPrice: number): number {
+  const record = (product && typeof product === "object" ? product : {}) as Record<string, unknown>;
+  const nested = (record.product && typeof record.product === "object"
+    ? record.product
+    : {}) as Record<string, unknown>;
+  return (
+    toFiniteNumber(record.price) ??
+    toFiniteNumber(nested.price) ??
+    toFiniteNumber(record.compareAtPrice) ??
+    toFiniteNumber(nested.compareAtPrice) ??
+    fallbackPrice
+  );
+}
+
+function resolveCompareAtPrice(product: unknown): number | null {
+  const record = (product && typeof product === "object" ? product : {}) as Record<string, unknown>;
+  const nested = (record.product && typeof record.product === "object"
+    ? record.product
+    : {}) as Record<string, unknown>;
+  return (
+    toFiniteNumber(record.compareAtPrice) ??
+    toFiniteNumber(nested.compareAtPrice)
+  );
+}
+
 export default function ProductDetailPage() {
   const [, params] = useRoute("/shop/:id");
   const id = parseInt(params?.id || "0");
@@ -47,8 +81,10 @@ export default function ProductDetailPage() {
     ? resolvedProduct.images.filter((img) => img && typeof img.url === "string")
     : [];
   const tags = Array.isArray(resolvedProduct.tags) ? resolvedProduct.tags : [];
+  const price = resolveProductPrice(resolvedProduct, fallbackProduct?.price ?? 0);
+  const compareAtPrice = resolveCompareAtPrice(resolvedProduct);
   const currentImage = images[selectedImageIndex] || images[0];
-  const isOnSale = resolvedProduct.compareAtPrice && resolvedProduct.compareAtPrice > resolvedProduct.price;
+  const isOnSale = compareAtPrice != null && compareAtPrice > price;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -98,8 +134,8 @@ export default function ProductDetailPage() {
           )}
 
           <div className="flex items-center gap-4 my-6">
-            <span className="font-display text-3xl font-semibold" style={{ color: "#C26D85" }}>{formatKES(resolvedProduct.price)}</span>
-            {isOnSale && <span className="font-sans text-lg line-through" style={{ color: "#A1A1AA" }}>{formatKES(resolvedProduct.compareAtPrice!)}</span>}
+            <span className="font-display text-3xl font-semibold" style={{ color: "#C26D85" }}>{formatKES(price)}</span>
+            {isOnSale && <span className="font-sans text-lg line-through" style={{ color: "#A1A1AA" }}>{formatKES(compareAtPrice!)}</span>}
           </div>
 
           {resolvedProduct.shortDescription && (
