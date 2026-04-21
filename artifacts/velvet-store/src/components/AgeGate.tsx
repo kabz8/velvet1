@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useGetAgeGateSettings } from "@workspace/api-client-react";
 
 const AGE_KEY = "velvet_age_confirmed";
+const AGE_CONFIRMED_AT_KEY = "velvet_age_confirmed_at";
+const AGE_GATE_TTL_MS = 24 * 60 * 60 * 1000;
 
 export function AgeGate() {
   const [show, setShow] = useState(false);
@@ -10,11 +12,16 @@ export function AgeGate() {
 
   useEffect(() => {
     const confirmed = localStorage.getItem(AGE_KEY);
-    if (!confirmed) setShow(true);
+    const confirmedAt = Number(localStorage.getItem(AGE_CONFIRMED_AT_KEY) || "0");
+    const isRecent = Number.isFinite(confirmedAt) && Date.now() - confirmedAt < AGE_GATE_TTL_MS;
+    if (!confirmed || !isRecent) {
+      setShow(true);
+    }
   }, []);
 
   const confirm = () => {
     localStorage.setItem(AGE_KEY, "1");
+    localStorage.setItem(AGE_CONFIRMED_AT_KEY, String(Date.now()));
     setShow(false);
   };
 
@@ -23,10 +30,6 @@ export function AgeGate() {
   };
 
   const settingsObj = settings && typeof settings === "object" ? settings : {};
-  const enabled = (settingsObj as { enabled?: unknown }).enabled;
-  const isEnabled = typeof enabled === "boolean" ? enabled : true;
-  if (!isEnabled) return null;
-
   const title = (settingsObj as { title?: string }).title || "Adults Only";
   const message = (settingsObj as { message?: string }).message || "This store contains products intended for adults 18 years of age and older.";
   const confirmLabel = (settingsObj as { confirmLabel?: string }).confirmLabel || "I am 18+, Enter";
