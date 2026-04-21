@@ -32,11 +32,11 @@ export function Header() {
       )}
       <header className="sticky top-0 z-50 border-b" style={{ background: "rgba(11,11,15,0.95)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 md:h-[4.5rem]">
             <Link href="/">
               <div className="flex items-center gap-2.5 cursor-pointer">
-                <img src={velvetLogo} alt={storeName} className="h-9 w-9 object-contain" />
-                <span className="font-sans text-lg font-light tracking-[0.15em] uppercase" style={{ color: "#E7D9C8" }}>
+                <img src={velvetLogo} alt={storeName} className="h-11 w-11 md:h-12 md:w-12 object-contain" />
+                <span className="font-sans text-base md:text-lg font-light tracking-[0.14em] uppercase" style={{ color: "#E7D9C8" }}>
                   {storeName}
                 </span>
               </div>

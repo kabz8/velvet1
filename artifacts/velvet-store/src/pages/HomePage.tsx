@@ -38,7 +38,7 @@ function BannerSlider() {
   const banner = banners[current] || fallback;
 
   return (
-    <div className="relative h-[60vh] min-h-[480px] overflow-hidden">
+    <div className="relative h-[52vh] min-h-[360px] md:h-[60vh] md:min-h-[480px] overflow-hidden">
       <div
         className="absolute inset-0 bg-cover bg-center transition-all duration-700"
         style={{ backgroundImage: `url(${getImageUrl(banner.imageUrl || null)})` }}
@@ -48,15 +48,15 @@ function BannerSlider() {
       <div className="relative z-10 h-full flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <motion.div key={current} initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }} className="max-w-xl">
-            <h1 className="font-display text-5xl md:text-6xl font-semibold leading-tight mb-4" style={{ color: "#E7D9C8" }}>
+            <h1 className="font-display text-3xl sm:text-4xl md:text-6xl font-semibold leading-tight mb-3 md:mb-4" style={{ color: "#E7D9C8" }}>
               {banner.title}
             </h1>
             {banner.subtitle && (
-              <p className="font-sans text-lg leading-relaxed mb-8" style={{ color: "#A1A1AA" }}>{banner.subtitle}</p>
+              <p className="font-sans text-sm sm:text-base md:text-lg leading-relaxed mb-6 md:mb-8" style={{ color: "#A1A1AA" }}>{banner.subtitle}</p>
             )}
             {banner.ctaLabel && (
               <Link href={(banner.ctaLink as string) || "/shop"}>
-                <button className="px-8 py-4 rounded-xl font-sans font-semibold text-sm tracking-wider uppercase transition-all duration-200 hover:opacity-90"
+                <button className="px-6 md:px-8 py-3.5 md:py-4 rounded-xl font-sans font-semibold text-xs md:text-sm tracking-wider uppercase transition-all duration-200 hover:opacity-90"
                   style={{ background: "linear-gradient(135deg, #6F2C91, #C26D85)", color: "#E7D9C8", letterSpacing: "0.1em" }}>
                   {banner.ctaLabel}
                 </button>
@@ -282,7 +282,7 @@ export default function HomePage() {
         <div className="max-w-lg mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="font-display text-3xl font-semibold mb-3" style={{ color: "#E7D9C8" }}>Join Our Inner Circle</h2>
           <p className="font-sans text-sm mb-6" style={{ color: "#A1A1AA" }}>Exclusive offers, new arrivals, and wellness tips — delivered discreetly.</p>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="email"
               placeholder="Your email address"

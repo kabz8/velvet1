@@ -54,8 +54,7 @@ export default function CheckoutPage() {
   const shippingFee = form.deliveryRegion === "nairobi" ? nairobiFee : outsideFee;
   const discount = couponApplied?.discountAmount ?? 0;
   const total = normalizedSubtotal + shippingFee - discount;
-  const whatsappPhoneRaw = siteSettings?.socialWhatsapp || siteSettings?.storePhone || "";
-  const whatsappPhone = whatsappPhoneRaw.replace(/[^\d]/g, "");
+  const whatsappPhone = "254111883825";
 
   const handleCouponValidate = async () => {
     setCouponError("");
@@ -139,18 +138,18 @@ export default function CheckoutPage() {
   const labelStyle = { color: "#A1A1AA", fontSize: "0.75rem", fontFamily: "DM Sans", textTransform: "uppercase" as const, letterSpacing: "0.08em" };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="font-display text-4xl font-semibold mb-2" style={{ color: "#E7D9C8" }}>Checkout</h1>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <h1 className="font-display text-3xl md:text-4xl font-semibold mb-2" style={{ color: "#E7D9C8" }}>Checkout</h1>
       <div className="flex items-center gap-2 mb-10">
         <Lock size={14} style={{ color: "#C26D85" }} />
         <span className="font-sans text-xs" style={{ color: "#A1A1AA" }}>Secure, discreet checkout. Your privacy is protected.</span>
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="lg:col-span-2 space-y-6 md:space-y-8">
             {/* Contact */}
-            <div className="p-6 rounded-2xl" style={{ background: "#14141A", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <div className="p-4 md:p-6 rounded-2xl" style={{ background: "#14141A", border: "1px solid rgba(255,255,255,0.06)" }}>
               <h2 className="font-display text-xl font-semibold mb-5" style={{ color: "#E7D9C8" }}>Contact Details</h2>
 
               <div className="flex items-center gap-3 mb-5 p-4 rounded-xl" style={{ background: "rgba(111,44,145,0.1)", border: "1px solid rgba(111,44,145,0.2)" }}>
@@ -179,7 +178,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* Delivery */}
-            <div className="p-6 rounded-2xl" style={{ background: "#14141A", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <div className="p-4 md:p-6 rounded-2xl" style={{ background: "#14141A", border: "1px solid rgba(255,255,255,0.06)" }}>
               <h2 className="font-display text-xl font-semibold mb-5" style={{ color: "#E7D9C8" }}>Delivery Details</h2>
               <div className="space-y-4">
                 <div>
@@ -201,7 +200,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* Payment */}
-            <div className="p-6 rounded-2xl" style={{ background: "#14141A", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <div className="p-4 md:p-6 rounded-2xl" style={{ background: "#14141A", border: "1px solid rgba(255,255,255,0.06)" }}>
               <h2 className="font-display text-xl font-semibold mb-5" style={{ color: "#E7D9C8" }}>Payment Method</h2>
               <div className="space-y-3">
                 {siteSettings?.cashOnDeliveryEnabled && (
@@ -226,7 +225,7 @@ export default function CheckoutPage() {
 
           {/* Order summary */}
           <div className="space-y-4">
-            <div className="p-6 rounded-2xl sticky top-20" style={{ background: "#14141A", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <div className="p-4 md:p-6 rounded-2xl lg:sticky lg:top-20" style={{ background: "#14141A", border: "1px solid rgba(255,255,255,0.06)" }}>
               <h2 className="font-display text-xl font-semibold mb-5" style={{ color: "#E7D9C8" }}>Order Summary</h2>
 
               <div className="space-y-3 mb-5 pb-5 border-b" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
