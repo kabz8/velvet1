@@ -37,7 +37,18 @@ function normalizeProduct(product: unknown): Product | null {
   const record = toRecord(product);
   const nested = toRecord(record.product);
   const nestedProducts = toRecord(record.products);
-  const id = toFiniteNumber(record.id ?? nested.id ?? nestedProducts.id, -1);
+  const id = toFiniteNumber(
+    record.id ??
+      record.productId ??
+      record.product_id ??
+      nested.id ??
+      nested.productId ??
+      nested.product_id ??
+      nestedProducts.id ??
+      nestedProducts.productId ??
+      nestedProducts.product_id,
+    -1,
+  );
   if (id <= 0) return null;
 
   const title =
